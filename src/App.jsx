@@ -6,6 +6,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import Home from './components/Home';
 import First from './components/First';
+import Movie from './components/Movie';
 
 const App = () => {
     return (
@@ -15,6 +16,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/home" element={<Home />} />
+                <Route path="/movie/:movieId" element={<Movie />} />
             </Routes>
         </Router>
     );
