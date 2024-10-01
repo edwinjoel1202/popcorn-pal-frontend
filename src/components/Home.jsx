@@ -13,7 +13,7 @@ const Home = () => {
         const fetchTrendingMovies = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/api/movies/trending');
-                setMovies(response.data.results);
+                setMovies(response.data); // Assuming the data comes as an array of movies
             } catch (error) {
                 console.error('Error fetching movies:', error);
             }
@@ -69,17 +69,27 @@ const Home = () => {
 
                 <h2 className="text-center mb-4">Trending Movies</h2>
                 <div className="row">
-                    {movies.map((movie) => (
-                        <div className="col-md-3 mb-4" key={movie.id}>
-                            <div className="card movie-card">
-                                <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="card-img-top" />
-                                <div className="card-body text-center">
-                                    <h5 className="card-title">{movie.title}</h5>
-                                    <p className="card-text">Rating: {movie.vote_average.toFixed(1)}</p>
-                                </div>
+                    {movies.length > 0 ? (
+                        movies.map((movie) => (
+                            <div className="col-md-3 mb-4" key={movie.id}>
+                                <Link to={`/movie/${movie.id}`} className="text-decoration-none">
+                                    <div className="card movie-card">
+                                        <img 
+                                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                                            alt={movie.title || movie.original_title} 
+                                            className="card-img-top" 
+                                        />
+                                        <div className="card-body text-center">
+                                            <h5 className="card-title">{movie.title || movie.original_title}</h5>
+                                            <p className="card-text">Rating: {movie.vote_average.toFixed(1)}</p>
+                                        </div>
+                                    </div>
+                                </Link>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className="text-center">No trending movies available at the moment.</p>
+                    )}
                 </div>
             </div>
         </div>
