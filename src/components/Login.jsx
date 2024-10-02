@@ -1,14 +1,16 @@
 // src/components/Login.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom'; // Import Link for the Register option
+import { UserContext } from '../context/UserContext';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { setUser } = useContext(UserContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,6 +23,7 @@ const Login = () => {
             });
 
             if (response.data.success) {
+                setUser(response.data.user);
                 navigate('/home');
             } else {
                 setError(response.data.message);
