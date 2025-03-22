@@ -16,7 +16,9 @@ const Movie = () => {
   const { user } = useContext(UserContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // For delete confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showWatchlistModal, setShowWatchlistModal] = useState(false); // For watchlist success
+  const [isInWatchlist, setIsInWatchlist] = useState(false); // Track watchlist status
   const navigate = useNavigate();
 
   console.log("User from Movie:", user);
@@ -33,14 +35,31 @@ const Movie = () => {
       }
     };
 
+    const checkWatchlist = async () => {
+      if (!user) return;
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/watchlist/check/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsInWatchlist(response.data); // true if in watchlist, false otherwise
+      } catch (error) {
+        console.error("Error checking watchlist:", error);
+      }
+    };
+
     fetchMovieDetails();
-  }, [id]);
+    checkWatchlist();
+  }, [id, user]);
 
   useEffect(() => {
     setReviews([]);
     setPage(0);
     setHasMoreReviews(true);
-    fetchReviews(0); // Initial fetch
+    fetchReviews(0);
   }, [id]);
 
   const fetchReviews = async (currentPage) => {
@@ -70,7 +89,6 @@ const Movie = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -111,7 +129,7 @@ const Movie = () => {
       setReviews([]);
       setPage(0);
       setHasMoreReviews(true);
-      fetchReviews(0); // Refresh reviews after adding
+      fetchReviews(0);
       setReviewText("");
       setRating(5);
       setShowSuccessModal(true);
@@ -152,7 +170,7 @@ const Movie = () => {
       setReviews([]);
       setPage(0);
       setHasMoreReviews(true);
-      fetchReviews(0); // Refresh reviews after deletion
+      fetchReviews(0);
       setShowDeleteModal(false);
     } catch (error) {
       console.error("Error deleting review:", error);
@@ -167,6 +185,44 @@ const Movie = () => {
     }
   };
 
+  const handleAddToWatchlist = async () => {
+    if (!user) {
+      alert("Please log in to add to your watchlist.");
+      navigate('/login');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await axios.post(
+        `http://localhost:8080/api/watchlist`,
+        { tmdbMovieId: parseInt(id) },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setIsInWatchlist(true);
+      setShowWatchlistModal(true);
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      if (error.response && error.response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login');
+      } else {
+        alert("An error occurred while adding to your watchlist. Please try again.");
+      }
+    }
+  };
+
   const loadMoreReviews = () => {
     setPage((prevPage) => prevPage + 1);
   };
@@ -177,6 +233,10 @@ const Movie = () => {
 
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
+  };
+
+  const closeWatchlistModal = () => {
+    setShowWatchlistModal(false);
   };
 
   const userReview = reviews.find((review) => user && review.username === user.username);
@@ -247,16 +307,25 @@ const Movie = () => {
                 </div>
               ))}
             </div>
-            {movie.homepage && (
-              <a
-                href={movie.homepage}
-                className="btn btn-primary mt-3"
-                target="_blank"
-                rel="noopener noreferrer"
+            <div className="mt-3">
+              {movie.homepage && (
+                <a
+                  href={movie.homepage}
+                  className="btn btn-primary me-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Official Website
+                </a>
+              )}
+              <button
+                className={`btn ${isInWatchlist ? 'btn-success' : 'btn-outline-primary'}`}
+                onClick={handleAddToWatchlist}
+                disabled={isInWatchlist}
               >
-                Official Website
-              </a>
-            )}
+                {isInWatchlist ? "Added to Watchlist" : "Add to Watchlist"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -302,7 +371,6 @@ const Movie = () => {
           </div>
         )}
 
-        {/* Success Modal */}
         {showSuccessModal && (
           <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -324,7 +392,6 @@ const Movie = () => {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
         {showDeleteModal && (
           <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -342,6 +409,27 @@ const Movie = () => {
                   </button>
                   <button type="button" className="btn btn-danger" onClick={handleDeleteReview}>
                     Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showWatchlistModal && (
+          <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Watchlist</h5>
+                  <button type="button" className="btn-close" onClick={closeWatchlistModal}></button>
+                </div>
+                <div className="modal-body">
+                  <p>Added to Watchlist!</p>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-primary" onClick={closeWatchlistModal}>
+                    OK
                   </button>
                 </div>
               </div>
