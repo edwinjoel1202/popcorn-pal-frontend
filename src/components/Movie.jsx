@@ -14,6 +14,7 @@ const Movie = () => {
   const [page, setPage] = useState(0);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const { user } = useContext(UserContext);
+  console.log("User from Movie:",user);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,7 +33,6 @@ const Movie = () => {
     fetchMovieDetails();
   }, [id]);
 
-  // Reset reviews and page when movie ID changes
   useEffect(() => {
     setReviews([]);
     setPage(0);
@@ -54,7 +54,6 @@ const Movie = () => {
         setHasMoreReviews(false);
       }
       setReviews((prevReviews) => {
-        // Filter out duplicates based on reviewId
         const newReviews = response.data.filter(
           (newReview) => !prevReviews.some((review) => review.reviewId === newReview.reviewId)
         );
@@ -111,7 +110,6 @@ const Movie = () => {
           }
         }
       );
-      // Reset reviews and page to fetch all reviews from the beginning
       setReviews([]);
       setPage(0);
       setHasMoreReviews(true);
@@ -229,7 +227,6 @@ const Movie = () => {
           </div>
         </div>
 
-        {/* Add Review Section */}
         <div className="mt-4">
           <h4>Add Your Review</h4>
           <form onSubmit={handleReviewSubmit}>
@@ -270,7 +267,6 @@ const Movie = () => {
           </form>
         </div>
 
-        {/* Display Reviews Section */}
         <div className="mt-5">
           <h4>User Reviews</h4>
           {reviews.length > 0 ? (

@@ -9,6 +9,7 @@ const TopRatedMovies = () => {
     const [topRatedMovies, setTopRatedMovies] = useState([]);
     const [error, setError] = useState(null);
     const { user } = useContext(UserContext);
+    console.log("User from TopRatedMovies:",user);
 
     useEffect(() => {
         const fetchTopRatedMovies = async () => {

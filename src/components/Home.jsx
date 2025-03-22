@@ -15,6 +15,8 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const { user } = useContext(UserContext);
+    console.log("User from Home:", user);
+
 
     useEffect(() => {
         const fetchMovies = async () => {

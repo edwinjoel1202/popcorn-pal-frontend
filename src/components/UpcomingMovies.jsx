@@ -9,6 +9,7 @@ const UpcomingMovies = () => {
     const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [error, setError] = useState(null);
     const { user } = useContext(UserContext);
+    console.log("User from UpcomingMovies:",user);
 
     useEffect(() => {
         const fetchUpcomingMovies = async () => {
