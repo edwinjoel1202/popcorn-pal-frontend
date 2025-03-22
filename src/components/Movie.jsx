@@ -17,8 +17,9 @@ const Movie = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showWatchlistModal, setShowWatchlistModal] = useState(false); // For watchlist success
-  const [isInWatchlist, setIsInWatchlist] = useState(false); // Track watchlist status
+  const [showWatchlistModal, setShowWatchlistModal] = useState(false);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [watchlistUpdated, setWatchlistUpdated] = useState(0); // Trigger re-check
   const navigate = useNavigate();
 
   console.log("User from Movie:", user);
@@ -36,8 +37,12 @@ const Movie = () => {
     };
 
     const checkWatchlist = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsInWatchlist(false);
+        return;
+      }
       const token = localStorage.getItem('token');
+      if (!token) return;
       try {
         const response = await axios.get(
           `http://localhost:8080/api/watchlist/check/${id}`,
@@ -45,15 +50,16 @@ const Movie = () => {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
-        setIsInWatchlist(response.data); // true if in watchlist, false otherwise
+        setIsInWatchlist(response.data);
       } catch (error) {
         console.error("Error checking watchlist:", error);
+        setIsInWatchlist(false); // Default to false on error
       }
     };
 
     fetchMovieDetails();
     checkWatchlist();
-  }, [id, user]);
+  }, [id, user, watchlistUpdated]); // Add watchlistUpdated as dependency
 
   useEffect(() => {
     setReviews([]);
@@ -223,8 +229,49 @@ const Movie = () => {
     }
   };
 
+  // New function to handle watchlist removal from this page (optional)
+  const handleRemoveFromWatchlist = async () => {
+    if (!user) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const watchlistResponse = await axios.get('http://localhost:8080/api/watchlist', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const movieInWatchlist = watchlistResponse.data.find(
+        (entry) => entry.tmdbMovieId === parseInt(id)
+      );
+
+      if (movieInWatchlist) {
+        await axios.delete(
+          `http://localhost:8080/api/watchlist/${movieInWatchlist.watchlistId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsInWatchlist(false);
+        setWatchlistUpdated((prev) => prev + 1); // Trigger re-check
+      }
+    } catch (error) {
+      console.error("Error removing from watchlist:", error);
+      if (error.response && error.response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login');
+      } else {
+        alert("An error occurred while removing from your watchlist. Please try again.");
+      }
+    }
+  };
+
   const loadMoreReviews = () => {
     setPage((prevPage) => prevPage + 1);
+    fetchReviews(page + 1);
   };
 
   const closeSuccessModal = () => {
@@ -320,10 +367,10 @@ const Movie = () => {
               )}
               <button
                 className={`btn ${isInWatchlist ? 'btn-success' : 'btn-outline-primary'}`}
-                onClick={handleAddToWatchlist}
-                disabled={isInWatchlist}
+                onClick={isInWatchlist ? handleRemoveFromWatchlist : handleAddToWatchlist}
+                disabled={isSubmitting} // Disable only during submission
               >
-                {isInWatchlist ? "Added to Watchlist" : "Add to Watchlist"}
+                {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
               </button>
             </div>
           </div>
@@ -425,7 +472,7 @@ const Movie = () => {
                   <button type="button" className="btn-close" onClick={closeWatchlistModal}></button>
                 </div>
                 <div className="modal-body">
-                  <p>Added to Watchlist!</p>
+                  <p>{isInWatchlist ? "Added to Watchlist!" : "Removed from Watchlist!"}</p>
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-primary" onClick={closeWatchlistModal}>

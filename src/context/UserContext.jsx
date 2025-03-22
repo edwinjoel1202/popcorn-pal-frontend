@@ -1,38 +1,43 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Create UserContext
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
 
-    // Load the user information when the component mounts
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Fetch user details from the backend using the token
-            axios.get('http://localhost:8080/api/users/me', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(response => {
-                const { username } = response.data;
-                setUser({ username });
-            })
-            .catch(error => {
-                console.error('Error fetching user details:', error);
-                // If token is invalid or expired, clear localStorage and set user to null
-                localStorage.removeItem('token');
-                setUser(null);
-            });
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('http://localhost:8080/api/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const { username } = response.data;
+          setUser({ username });
+          console.log("User fetched successfully:", username);
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          localStorage.removeItem('token');
+          setUser(null);
         }
-    }, []);
+      } else {
+        console.log("No token found in localStorage");
+        setUser(null);
+      }
+      setLoading(false); // Mark loading complete
+    };
 
-    return (
-        <UserContext.Provider value={{ user, setUser }}>
-            {children}
-        </UserContext.Provider>
-    );
+    fetchUser();
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, setUser, loading }}>
+      {loading ? <div>Loading...</div> : children}
+    </UserContext.Provider>
+  );
 };
