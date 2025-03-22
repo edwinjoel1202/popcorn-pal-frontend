@@ -14,9 +14,12 @@ const Movie = () => {
   const [page, setPage] = useState(0);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const { user } = useContext(UserContext);
-  console.log("User from Movie:",user);
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // For delete confirmation
+  const navigate = useNavigate();
+
+  console.log("User from Movie:", user);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -37,6 +40,7 @@ const Movie = () => {
     setReviews([]);
     setPage(0);
     setHasMoreReviews(true);
+    fetchReviews(0); // Initial fetch
   }, [id]);
 
   const fetchReviews = async (currentPage) => {
@@ -63,12 +67,6 @@ const Movie = () => {
       console.error("Error fetching reviews:", error);
     }
   };
-
-  useEffect(() => {
-    if (id) {
-      fetchReviews(page);
-    }
-  }, [page, id]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -113,8 +111,10 @@ const Movie = () => {
       setReviews([]);
       setPage(0);
       setHasMoreReviews(true);
+      fetchReviews(0); // Refresh reviews after adding
       setReviewText("");
       setRating(5);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error submitting review:", error);
       if (error.response && error.response.status === 401) {
@@ -130,9 +130,57 @@ const Movie = () => {
     }
   };
 
+  const handleDeleteReview = async () => {
+    if (!user || !userReview) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/reviews/${userReview.reviewId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setReviews([]);
+      setPage(0);
+      setHasMoreReviews(true);
+      fetchReviews(0); // Refresh reviews after deletion
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      if (error.response && error.response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login');
+      } else if (error.response && error.response.status === 403) {
+        alert("You can only delete your own reviews.");
+      } else {
+        alert("An error occurred while deleting your review. Please try again.");
+      }
+    }
+  };
+
   const loadMoreReviews = () => {
     setPage((prevPage) => prevPage + 1);
   };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
+  const userReview = reviews.find((review) => user && review.username === user.username);
+  const otherReviews = reviews.filter((review) => !user || review.username !== user.username);
 
   if (!movie) {
     return <div>Loading...</div>;
@@ -164,40 +212,26 @@ const Movie = () => {
           <div className="col-md-8">
             <h3>Overview</h3>
             <p>{movie.overview}</p>
-
             <h5>Genres</h5>
             <ul>
               {movie.genres.map((genre) => (
                 <li key={genre.id}>{genre.name}</li>
               ))}
             </ul>
-
             <h5>Details</h5>
             <ul>
-              <li>
-                <strong>Release Date:</strong> {movie.release_date}
-              </li>
-              <li>
-                <strong>Runtime:</strong> {movie.runtime} minutes
-              </li>
+              <li><strong>Release Date:</strong> {movie.release_date}</li>
+              <li><strong>Runtime:</strong> {movie.runtime} minutes</li>
               <li>
                 <strong>Language:</strong>{" "}
-                {movie.spoken_languages
-                  .map((lang) => lang.english_name)
-                  .join(", ")}
+                {movie.spoken_languages.map((lang) => lang.english_name).join(", ")}
               </li>
+              <li><strong>Budget:</strong> ${movie.budget.toLocaleString()}</li>
+              <li><strong>Revenue:</strong> ${movie.revenue.toLocaleString()}</li>
               <li>
-                <strong>Budget:</strong> ${movie.budget.toLocaleString()}
-              </li>
-              <li>
-                <strong>Revenue:</strong> ${movie.revenue.toLocaleString()}
-              </li>
-              <li>
-                <strong>Average Rating:</strong> {movie.vote_average.toFixed(1)}{" "}
-                ({movie.vote_count} votes)
+                <strong>Average Rating:</strong> {movie.vote_average.toFixed(1)} ({movie.vote_count} votes)
               </li>
             </ul>
-
             <h5>Production Companies</h5>
             <div className="production-companies">
               {movie.production_companies.map((company) => (
@@ -213,7 +247,6 @@ const Movie = () => {
                 </div>
               ))}
             </div>
-
             {movie.homepage && (
               <a
                 href={movie.homepage}
@@ -227,57 +260,122 @@ const Movie = () => {
           </div>
         </div>
 
-        <div className="mt-4">
-          <h4>Add Your Review</h4>
-          <form onSubmit={handleReviewSubmit}>
-            <div className="mb-3">
-              <label htmlFor="rating" className="form-label">
-                Rating: {rating}
-              </label>
-              <input
-                type="range"
-                id="rating"
-                className="form-range"
-                min="1"
-                max="10"
-                step="0.1"
-                value={rating}
-                onChange={(e) => setRating(parseFloat(e.target.value))}
-                required
-                disabled={isSubmitting}
-              />
+        {!userReview && user && (
+          <div className="mt-4">
+            <h4>Add Your Review</h4>
+            <form onSubmit={handleReviewSubmit}>
+              <div className="mb-3">
+                <label htmlFor="rating" className="form-label">
+                  Rating: {rating}
+                </label>
+                <input
+                  type="range"
+                  id="rating"
+                  className="form-range"
+                  min="1"
+                  max="10"
+                  step="0.1"
+                  value={rating}
+                  onChange={(e) => setRating(parseFloat(e.target.value))}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="reviewText" className="form-label">
+                  Review
+                </label>
+                <textarea
+                  id="reviewText"
+                  className="form-control"
+                  rows="3"
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Review"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Success</h5>
+                  <button type="button" className="btn-close" onClick={closeSuccessModal}></button>
+                </div>
+                <div className="modal-body">
+                  <p>Review added successfully!</p>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-primary" onClick={closeSuccessModal}>
+                    OK
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="mb-3">
-              <label htmlFor="reviewText" className="form-label">
-                Review
-              </label>
-              <textarea
-                id="reviewText"
-                className="form-control"
-                rows="3"
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Confirm Deletion</h5>
+                  <button type="button" className="btn-close" onClick={closeDeleteModal}></button>
+                </div>
+                <div className="modal-body">
+                  <p>Are you sure you want to delete your review? This action cannot be undone.</p>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>
+                    Cancel
+                  </button>
+                  <button type="button" className="btn btn-danger" onClick={handleDeleteReview}>
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Review"}
-            </button>
-          </form>
-        </div>
+          </div>
+        )}
 
         <div className="mt-5">
           <h4>User Reviews</h4>
           {reviews.length > 0 ? (
             <ul className="list-group">
-              {reviews.map((review) => (
+              {userReview && (
+                <li
+                  className="list-group-item d-flex justify-content-between align-items-start"
+                  style={{ backgroundColor: '#d4edda', borderColor: '#c3e6cb' }}
+                >
+                  <div>
+                    <strong>{userReview.username} - Rating: {userReview.rating}/10</strong>
+                    <p>{userReview.reviewText}</p>
+                    <small>Reviewed on: {new Date(userReview.createdAt).toLocaleString()}</small>
+                  </div>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    Delete
+                  </button>
+                </li>
+              )}
+              {otherReviews.map((review) => (
                 <li key={review.reviewId} className="list-group-item">
                   <strong>{review.username} - Rating: {review.rating}/10</strong>
                   <p>{review.reviewText}</p>
-                  <small>
-                    Reviewed on: {new Date(review.createdAt).toLocaleString()}
-                  </small>
+                  <small>Reviewed on: {new Date(review.createdAt).toLocaleString()}</small>
                 </li>
               ))}
             </ul>
