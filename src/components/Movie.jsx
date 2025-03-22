@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../components/css/Movie.css"; // Import CSS for styling
+import { UserContext } from '../context/UserContext';
+import "../components/css/Movie.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Movie = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState("");
-  const [rating, setRating] = useState(5); // Default rating to 5
+  const [rating, setRating] = useState(5);
   const [page, setPage] = useState(0);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Fetch movie details from TMDB API
     const fetchMovieDetails = async () => {
       try {
         const response = await axios.get(
@@ -28,7 +32,13 @@ const Movie = () => {
     fetchMovieDetails();
   }, [id]);
 
-  // Fetch reviews from the backend in batches of 10
+  // Reset reviews and page when movie ID changes
+  useEffect(() => {
+    setReviews([]);
+    setPage(0);
+    setHasMoreReviews(true);
+  }, [id]);
+
   const fetchReviews = async (currentPage) => {
     try {
       const response = await axios.get(
@@ -43,41 +53,85 @@ const Movie = () => {
       if (response.data.length < 10) {
         setHasMoreReviews(false);
       }
-      setReviews((prevReviews) => [...prevReviews, ...response.data]);
+      setReviews((prevReviews) => {
+        // Filter out duplicates based on reviewId
+        const newReviews = response.data.filter(
+          (newReview) => !prevReviews.some((review) => review.reviewId === newReview.reviewId)
+        );
+        return [...prevReviews, ...newReviews];
+      });
     } catch (error) {
       console.error("Error fetching reviews:", error);
     }
   };
 
-  // Load reviews on component mount
   useEffect(() => {
-    fetchReviews(page);
-  }, [page]);
+    if (id) {
+      fetchReviews(page);
+    }
+  }, [page, id]);
 
-  // Handle review submission
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (!user) {
+      alert("Please log in to submit a review.");
+      navigate('/login');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      navigate('/login');
+      setIsSubmitting(false);
+      return;
+    }
+
     const newReview = {
-      tmdbMovieId: id,
+      tmdbMovieId: parseInt(id),
+      username: user.username,
       reviewText,
       rating,
       createdAt: new Date().toISOString(),
     };
 
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:8080/api/reviews",
-        newReview
+        newReview,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
-      setReviews((prevReviews) => [response.data, ...prevReviews]);
+      // Reset reviews and page to fetch all reviews from the beginning
+      setReviews([]);
+      setPage(0);
+      setHasMoreReviews(true);
       setReviewText("");
       setRating(5);
     } catch (error) {
       console.error("Error submitting review:", error);
+      if (error.response && error.response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login');
+      } else if (error.response && error.response.status === 400) {
+        alert(error.response.data.message || "You have already submitted a review for this movie.");
+      } else {
+        alert("An error occurred while submitting your review. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Load more reviews
   const loadMoreReviews = () => {
     setPage((prevPage) => prevPage + 1);
   };
@@ -193,6 +247,7 @@ const Movie = () => {
                 value={rating}
                 onChange={(e) => setRating(parseFloat(e.target.value))}
                 required
+                disabled={isSubmitting}
               />
             </div>
             <div className="mb-3">
@@ -206,10 +261,11 @@ const Movie = () => {
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 required
+                disabled={isSubmitting}
               />
             </div>
-            <button type="submit" className="btn btn-primary">
-              Submit Review
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Review"}
             </button>
           </form>
         </div>
@@ -221,7 +277,7 @@ const Movie = () => {
             <ul className="list-group">
               {reviews.map((review) => (
                 <li key={review.reviewId} className="list-group-item">
-                  <strong>Rating: {review.rating}/10</strong>
+                  <strong>{review.username} - Rating: {review.rating}/10</strong>
                   <p>{review.reviewText}</p>
                   <small>
                     Reviewed on: {new Date(review.createdAt).toLocaleString()}
