@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/SearchResults.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import './css/SearchResults.css';
+import Navbar from './Navbar';
+import { UserContext } from '../context/UserContext';
 
 const SearchResults = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const location = useLocation();
+    const { user } = useContext(UserContext);
 
     // Extract query parameter from URL
     const query = new URLSearchParams(location.search).get('query') || '';
@@ -41,7 +44,8 @@ const SearchResults = () => {
 
     return (
         <div>
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <Navbar user={user} />
+            {/* <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/home">PopcornPal</Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +60,7 @@ const SearchResults = () => {
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </nav> */}
 
             <div className="container mt-4">
                 <h1>Search Results for "{query}"</h1>

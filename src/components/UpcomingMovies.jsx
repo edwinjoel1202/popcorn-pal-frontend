@@ -2,8 +2,9 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 // import './css/UpcomingMovies.css';
+import Navbar from './Navbar';
 
 const UpcomingMovies = () => {
     const [upcomingMovies, setUpcomingMovies] = useState([]);
@@ -27,8 +28,9 @@ const UpcomingMovies = () => {
 
     return (
         <div>
+            <Navbar user={user} />
             {/* Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            {/* <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/home">PopcornPal</Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +45,7 @@ const UpcomingMovies = () => {
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </nav> */}
 
             {/* Main Content */}
             <div className="container mt-4">

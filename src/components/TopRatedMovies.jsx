@@ -2,8 +2,9 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 // import './css/TopRatedMovies.css';
+import Navbar from './Navbar';
 
 const TopRatedMovies = () => {
     const [topRatedMovies, setTopRatedMovies] = useState([]);
@@ -27,7 +28,8 @@ const TopRatedMovies = () => {
 
     return (
         <div>
-            {/* Navbar */}
+            <Navbar user={user} />
+            {/* Navbar
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/home">PopcornPal</Link>
@@ -43,7 +45,7 @@ const TopRatedMovies = () => {
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </nav> */}
 
             {/* Main Content */}
             <div className="container mt-4">

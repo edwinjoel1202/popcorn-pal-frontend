@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserContext } from '../context/UserContext';
 // import "../components/css/Movie.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import Navbar from './Navbar';
 
 const Movie = () => {
   const { id } = useParams();
@@ -294,7 +295,9 @@ const Movie = () => {
   }
 
   return (
+    
     <div className="movie-container">
+      <Navbar user={user} />
       <div
         className="movie-header"
         style={{

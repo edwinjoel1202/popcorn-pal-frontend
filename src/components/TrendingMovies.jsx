@@ -1,13 +1,17 @@
 // src/components/TrendingMovies.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useContext} from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../context/UserContext';
 // import './css/TrendingMovies.css'; // Create this file for styling
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import Navbar from './Navbar';
+
 
 const TrendingMovies = () => {
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [error, setError] = useState(null);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         const fetchTrendingMovies = async () => {
@@ -24,7 +28,9 @@ const TrendingMovies = () => {
     }, []);
 
     return (
-        <div className="container mt-4">
+        <div>
+            <Navbar user={user} />
+            <div className="container">
             <h1>Trending Movies</h1>
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="row">
@@ -46,6 +52,7 @@ const TrendingMovies = () => {
                     <p>No trending movies available.</p>
                 )}
             </div>
+        </div>
         </div>
     );
 };

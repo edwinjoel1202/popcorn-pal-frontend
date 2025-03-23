@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 // import './css/PopularMovies.css';
+import Navbar from './Navbar';
+import { UserContext } from '../context/UserContext';
 
 const PopularMovies = () => {
     const [popularMovies, setPopularMovies] = useState([]);
     const [error, setError] = useState(null);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         const fetchPopularMovies = async () => {
@@ -22,7 +25,9 @@ const PopularMovies = () => {
     }, []);
 
     return (
-        <div className="container mt-4">
+        <div>
+            <Navbar user={user} />
+            <div className="container mt-4">  
             <h1>Popular Movies</h1>
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="row">
@@ -44,6 +49,7 @@ const PopularMovies = () => {
                     <p>No popular movies available.</p>
                 )}
             </div>
+        </div>
         </div>
     );
 };
