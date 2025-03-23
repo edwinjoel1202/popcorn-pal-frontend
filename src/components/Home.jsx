@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import '../components/css/Home.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -9,14 +9,16 @@ const Home = () => {
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [popularMovies, setPopularMovies] = useState([]);
     const [topRatedMovies, setTopRatedMovies] = useState([]);
-    const [upcomingMovies, setUpcomingMovies] = useState([]); // Added state for Upcoming Movies
+    const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const [error, setError] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const { user } = useContext(UserContext);
-    console.log("User from Home:", user);
+    const navigate = useNavigate();
 
+    console.log("User from Home:", user);
 
     useEffect(() => {
         const fetchMovies = async () => {
@@ -30,7 +32,7 @@ const Home = () => {
                 const topRatedResponse = await axios.get('http://localhost:8080/api/movies/top-rated');
                 setTopRatedMovies(topRatedResponse.data);
 
-                const upcomingResponse = await axios.get('http://localhost:8080/api/movies/upcoming'); // Added fetch for Upcoming Movies
+                const upcomingResponse = await axios.get('http://localhost:8080/api/movies/upcoming');
                 setUpcomingMovies(upcomingResponse.data);
 
                 const nowPlayingResponse = await axios.get('http://localhost:8080/api/movies/now-playing');
@@ -56,6 +58,30 @@ const Home = () => {
         }
     }, [nowPlayingMovies]);
 
+    useEffect(() => {
+        if (!searchTerm.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(() => {
+            const fetchSearchResults = async () => {
+                try {
+                    const response = await axios.get('http://localhost:8080/api/movies/search', {
+                        params: { query: searchTerm }
+                    });
+                    setSearchResults(response.data.slice(0, 5));
+                } catch (error) {
+                    console.error('Error fetching search results:', error);
+                    setSearchResults([]);
+                }
+            };
+            fetchSearchResults();
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+
     const handlePrev = () => {
         setActiveIndex((prevIndex) => 
             prevIndex === 0 ? nowPlayingMovies.length - 1 : prevIndex - 1
@@ -74,8 +100,14 @@ const Home = () => {
 
     const handleSearch = () => {
         if (searchTerm.trim()) {
-            window.location.href = `/search?query=${encodeURIComponent(searchTerm)}`; // Redirect to a search page
+            navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
         }
+    };
+
+    const handleResultClick = (movieId) => {
+        setSearchTerm('');
+        setSearchResults([]);
+        navigate(`/movie/${movieId}`);
     };
 
     return (
@@ -98,27 +130,53 @@ const Home = () => {
             </nav>
 
             <div className="container mt-4">
-                {error && <div className="alert alert-danger">{error}</div>} {/* Moved error message to the top */}
+                {error && <div className="alert alert-danger">{error}</div>}
 
                 <h1 className="slogan">Grab Your Popcorn, Dive In!</h1>
-                <div className="input-group mb-4">
+                <div className="input-group mb-4 position-relative">
                     <input 
                         type="text" 
                         className="form-control" 
                         placeholder="Search movies..." 
                         value={searchTerm} 
-                        onChange={handleSearchChange} 
+                        onChange={handleSearchChange}
                     />
                     <button 
                         className="btn btn-primary" 
                         type="button" 
-                        onClick={handleSearch} // Added search handler
+                        onClick={handleSearch}
                     >
                         Search
                     </button>
+                    {searchResults.length > 0 && (
+                        <ul className="search-results-dropdown">
+                            {searchResults.map((movie) => (
+                                <li
+                                    key={movie.id}
+                                    className="search-result-item"
+                                    onClick={() => handleResultClick(movie.id)}
+                                >
+                                    <img
+                                        src={
+                                            movie.poster_path
+                                                ? `https://image.tmdb.org/t/p/w92${movie.poster_path}`
+                                                : 'https://via.placeholder.com/92x138?text=No+Poster'
+                                        }
+                                        alt={movie.title}
+                                        className="search-result-poster"
+                                    />
+                                    <div className="search-result-info">
+                                        <span className="search-result-title">{movie.title}</span>
+                                        <span className="search-result-year">
+                                            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+                                        </span>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
 
-                {/* Now Playing Carousel */}
                 <h2>Now Playing in Theaters</h2>
                 <div id="nowPlayingCarousel" className="carousel slide mb-4">
                     <div className="carousel-inner">
@@ -159,7 +217,6 @@ const Home = () => {
                     </button>
                 </div>
 
-                {/* Trending Movies Section */}
                 <div className="trending-section">
                     <div className="trending-header">
                         <h2>Trending Movies</h2>
@@ -184,7 +241,6 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Popular Movies Section */}
                 <div className="popular-section">
                     <div className="popular-header">
                         <h2>Popular Movies</h2>
@@ -209,7 +265,6 @@ const Home = () => {
                     </div>
                 </div>
                 
-                {/* Top Rated Movies Section */}
                 <div className="top-rated-section">
                     <div className="top-rated-header">
                         <h2>Top Rated Movies</h2>
@@ -234,7 +289,6 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Upcoming Movies Section */}
                 <div className="upcoming-section">
                     <div className="upcoming-header">
                         <h2>Upcoming Movies</h2>
