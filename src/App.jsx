@@ -14,8 +14,7 @@ import TopRatedMovies from './components/TopRatedMovies';
 import UpcomingMovies from './components/UpcomingMovies';
 import Watchlist from './components/Watchlist';
 import SearchResults from './components/SearchResults';
-
-
+import "./components/css/Styles.css";
 
 const App = () => {
   return (

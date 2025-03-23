@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './css/TrendingMovies.css'; // Create this file for styling
+// import './css/TrendingMovies.css'; // Create this file for styling
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TrendingMovies = () => {

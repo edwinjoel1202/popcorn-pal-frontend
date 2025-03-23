@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserContext } from '../context/UserContext';
-import "../components/css/Movie.css";
+// import "../components/css/Movie.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Movie = () => {

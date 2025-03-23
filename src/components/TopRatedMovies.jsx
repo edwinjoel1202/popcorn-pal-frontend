@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/TopRatedMovies.css';
+// import './css/TopRatedMovies.css';
 
 const TopRatedMovies = () => {
     const [topRatedMovies, setTopRatedMovies] = useState([]);

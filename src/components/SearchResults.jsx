@@ -77,7 +77,7 @@ const SearchResults = () => {
                                             src={
                                                 movie.poster_path
                                                     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                                                    : 'https://via.placeholder.com/500x750?text=No+Poster'
+                                                    : '/assets/movie_poster_placeholder.jpg'
                                             }
                                             className="card-img-top"
                                             alt={movie.title}
