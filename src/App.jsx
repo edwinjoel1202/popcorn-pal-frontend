@@ -13,6 +13,8 @@ import TrendingMovies from './components/TrendingMovies';
 import TopRatedMovies from './components/TopRatedMovies';
 import UpcomingMovies from './components/UpcomingMovies';
 import Watchlist from './components/Watchlist';
+import SearchResults from './components/SearchResults';
+
 
 
 const App = () => {
@@ -24,6 +26,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/movie/:id" element={<Movie />} />
           <Route path="/trending" element={<TrendingMovies />} />
           <Route path="/popular" element={<PopularMovies />} />

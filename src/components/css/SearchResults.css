@@ -1,0 +1,24 @@
+.movie-card {
+    transition: transform 0.2s;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+}
+
+.card-img-top {
+    height: 450px;
+    object-fit: cover;
+}
+
+.card-title {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.card-text {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+

@@ -233,16 +233,10 @@
 }
 
 
-/* Existing styles */
 .navbar {
     background-color: #1a1a1a;
 }
 
-.slogan {
-    text-align: center;
-    color: #fff;
-    margin-bottom: 20px;
-}
 
 .carousel-image {
     height: 500px;
