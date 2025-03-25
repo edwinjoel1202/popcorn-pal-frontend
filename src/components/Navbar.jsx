@@ -24,7 +24,13 @@ const Navbar = ({ user }) => {
                             <Link className="nav-link" to="/home">Home</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/contact">Contact</Link>
+                            <Link className="nav-link" to="/trending">Trending</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/popular">Popular</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/top-rated">Top Rated</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/watchlist">Watchlist</Link>

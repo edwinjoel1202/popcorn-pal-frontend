@@ -43,6 +43,11 @@ p { font-size: 1rem; line-height: 1.5; }
 .navbar {
     background-color: var(--dark-bg);
     padding: 1rem 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 .navbar-brand {

@@ -132,7 +132,7 @@ const Home = () => {
 
             <Navbar user={user} />
 
-            <div className="container mt-4">
+            <div className="container mt-5">
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <h1 className="slogan">Grab Your Popcorn, Dive In!</h1>
