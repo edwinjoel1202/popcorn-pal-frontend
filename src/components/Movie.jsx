@@ -21,6 +21,7 @@ const Movie = () => {
   const [showWatchlistModal, setShowWatchlistModal] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [watchlistUpdated, setWatchlistUpdated] = useState(0); // Trigger re-check
+  const [filterCategory, setFilterCategory] = useState("All"); // State for filter category
   const navigate = useNavigate();
 
   console.log("User from Movie:", user);
@@ -230,7 +231,6 @@ const Movie = () => {
     }
   };
 
-  // New function to handle watchlist removal from this page (optional)
   const handleRemoveFromWatchlist = async () => {
     if (!user) return;
 
@@ -290,12 +290,34 @@ const Movie = () => {
   const userReview = reviews.find((review) => user && review.username === user.username);
   const otherReviews = reviews.filter((review) => !user || review.username !== user.username);
 
+  // Filter reviews based on the selected category
+  const filteredUserReview = userReview && (filterCategory === "All" || userReview.tag === filterCategory) ? userReview : null;
+  const filteredOtherReviews = otherReviews.filter(
+    (review) => filterCategory === "All" || review.tag === filterCategory
+  );
+
+  // Determine if there are more reviews to load after filtering
+  const hasMoreFilteredReviews = hasMoreReviews && filteredOtherReviews.length + (filteredUserReview ? 1 : 0) >= (page + 1) * 10;
+
   if (!movie) {
     return <div>Loading...</div>;
   }
 
+  // Function to get badge class based on sentiment
+  const getBadgeClass = (tag) => {
+    switch (tag) {
+      case "Positive":
+        return "badge rounded-pill bg-success";
+      case "Negative":
+        return "badge rounded-pill bg-danger";
+      case "Neutral":
+        return "badge rounded-pill bg-warning text-dark";
+      default:
+        return "badge rounded-pill bg-secondary";
+    }
+  };
+
   return (
-    
     <div className="movie-container">
       <Navbar user={user} />
       <div
@@ -489,17 +511,55 @@ const Movie = () => {
 
         <div className="mt-5">
           <h4>User Reviews</h4>
-          {reviews.length > 0 ? (
+          {/* Filter Section */}
+          <div className="mb-3">
+            <label className="me-2">Filter by Sentiment:</label>
+            <div className="btn-group" role="group">
+              <button
+                type="button"
+                className={`btn ${filterCategory === "All" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => setFilterCategory("All")}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`btn ${filterCategory === "Positive" ? "btn-success" : "btn-outline-success"}`}
+                onClick={() => setFilterCategory("Positive")}
+              >
+                Positive
+              </button>
+              <button
+                type="button"
+                className={`btn ${filterCategory === "Neutral" ? "btn-warning" : "btn-outline-warning"}`}
+                onClick={() => setFilterCategory("Neutral")}
+              >
+                Neutral
+              </button>
+              <button
+                type="button"
+                className={`btn ${filterCategory === "Negative" ? "btn-danger" : "btn-outline-danger"}`}
+                onClick={() => setFilterCategory("Negative")}
+              >
+                Negative
+              </button>
+            </div>
+          </div>
+
+          {(filteredUserReview || filteredOtherReviews.length > 0) ? (
             <ul className="list-group">
-              {userReview && (
+              {filteredUserReview && (
                 <li
                   className="list-group-item d-flex justify-content-between align-items-start"
                   style={{ backgroundColor: '#d4edda', borderColor: '#c3e6cb' }}
                 >
                   <div>
-                    <strong>{userReview.username} - Rating: {userReview.rating}/10</strong>
-                    <p>{userReview.reviewText}</p>
-                    <small>Reviewed on: {new Date(userReview.createdAt).toLocaleString()}</small>
+                    <strong>{filteredUserReview.username} - Rating: {filteredUserReview.rating}/10</strong>
+                    <span className={`ms-2 ${getBadgeClass(filteredUserReview.tag)}`}>
+                      {filteredUserReview.tag || "Unknown"}
+                    </span>
+                    <p>{filteredUserReview.reviewText}</p>
+                    <small>Reviewed on: {new Date(filteredUserReview.createdAt).toLocaleString()}</small>
                   </div>
                   <button
                     className="btn btn-danger btn-sm"
@@ -509,18 +569,21 @@ const Movie = () => {
                   </button>
                 </li>
               )}
-              {otherReviews.map((review) => (
+              {filteredOtherReviews.map((review) => (
                 <li key={review.reviewId} className="list-group-item">
                   <strong>{review.username} - Rating: {review.rating}/10</strong>
+                  <span className={`ms-2 ${getBadgeClass(review.tag)}`}>
+                    {review.tag || "Unknown"}
+                  </span>
                   <p>{review.reviewText}</p>
                   <small>Reviewed on: {new Date(review.createdAt).toLocaleString()}</small>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No reviews yet. Be the first to add a review!</p>
+            <p>No reviews match the selected filter. Try a different category!</p>
           )}
-          {hasMoreReviews && (
+          {hasMoreFilteredReviews && (
             <div className="text-center mt-3">
               <button className="btn btn-secondary" onClick={loadMoreReviews}>
                 Load More Reviews
