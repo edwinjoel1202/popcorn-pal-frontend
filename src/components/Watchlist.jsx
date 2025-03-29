@@ -132,7 +132,7 @@ const Watchlist = () => {
   return (
     <div>
       <Navbar user={user} />
-      <div className="container mt-4">
+      <div className="container mt-5">
         <h1>Your Watchlist</h1>
         {error && <div className="alert alert-danger">{error}</div>}
 
