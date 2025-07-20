@@ -17,7 +17,7 @@ const Login = () => {
         setLoading(true); // Start loading
 
         try {
-            const response = await axios.post('http://localhost:8080/api/users/login', {
+            const response = await axios.post('https://popcorn-pal.onrender.com/api/users/login', {
                 username,
                 password,
             });

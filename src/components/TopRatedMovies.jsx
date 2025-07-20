@@ -15,7 +15,7 @@ const TopRatedMovies = () => {
     useEffect(() => {
         const fetchTopRatedMovies = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/movies/top-rated');
+                const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/top-rated');
                 setTopRatedMovies(response.data);
                 setError(null);
             } catch (error) {

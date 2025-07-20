@@ -30,7 +30,7 @@ const Movie = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/movies/details/${id}`
+          `https://popcorn-pal.onrender.com/api/movies/details/${id}`
         );
         setMovie(response.data);
       } catch (error) {
@@ -47,7 +47,7 @@ const Movie = () => {
       if (!token) return;
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/watchlist/check/${id}`,
+          `https://popcorn-pal.onrender.com/api/watchlist/check/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -73,7 +73,7 @@ const Movie = () => {
   const fetchReviews = async (currentPage) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/reviews/movie/${id}`,
+        `https://popcorn-pal.onrender.com/api/reviews/movie/${id}`,
         {
           params: {
             page: currentPage,
@@ -125,7 +125,7 @@ const Movie = () => {
 
     try {
       await axios.post(
-        "http://localhost:8080/api/reviews",
+        "https://popcorn-pal.onrender.com/api/reviews",
         newReview,
         {
           headers: {
@@ -168,7 +168,7 @@ const Movie = () => {
 
     try {
       await axios.delete(
-        `http://localhost:8080/api/reviews/${userReview.reviewId}`,
+        `https://popcorn-pal.onrender.com/api/reviews/${userReview.reviewId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -209,7 +209,7 @@ const Movie = () => {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/watchlist`,
+        `https://popcorn-pal.onrender.com/api/watchlist`,
         { tmdbMovieId: parseInt(id) },
         {
           headers: {
@@ -242,7 +242,7 @@ const Movie = () => {
     }
 
     try {
-      const watchlistResponse = await axios.get('http://localhost:8080/api/watchlist', {
+      const watchlistResponse = await axios.get('https://popcorn-pal.onrender.com/api/watchlist', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const movieInWatchlist = watchlistResponse.data.find(
@@ -251,7 +251,7 @@ const Movie = () => {
 
       if (movieInWatchlist) {
         await axios.delete(
-          `http://localhost:8080/api/watchlist/${movieInWatchlist.watchlistId}`,
+          `https://popcorn-pal.onrender.com/api/watchlist/${movieInWatchlist.watchlistId}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }

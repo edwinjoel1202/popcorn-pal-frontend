@@ -28,7 +28,7 @@ const Watchlist = () => {
       try {
         // Fetch watchlist entries
         const watchlistResponse = await axios.get(
-          "http://localhost:8080/api/watchlist",
+          "https://popcorn-pal.onrender.com/api/watchlist",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -40,7 +40,7 @@ const Watchlist = () => {
           watchlistData.map(async (entry) => {
             try {
               const movieResponse = await axios.get(
-                `http://localhost:8080/api/movies/details/${entry.tmdbMovieId}`
+                `https://popcorn-pal.onrender.com/api/movies/details/${entry.tmdbMovieId}`
               );
               return {
                 ...entry,
@@ -85,7 +85,7 @@ const Watchlist = () => {
     const token = localStorage.getItem("token");
     try {
       await axios.delete(
-        `http://localhost:8080/api/watchlist/${movieToDelete.watchlistId}`,
+        `https://popcorn-pal.onrender.com/api/watchlist/${movieToDelete.watchlistId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

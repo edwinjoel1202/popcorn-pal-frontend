@@ -24,19 +24,19 @@ const Home = () => {
     useEffect(() => {
         const fetchMovies = async () => {
             try {
-                const trendingResponse = await axios.get('http://localhost:8080/api/movies/trending');
+                const trendingResponse = await axios.get('https://popcorn-pal.onrender.com/api/movies/trending');
                 setTrendingMovies(trendingResponse.data);
 
-                const popularResponse = await axios.get('http://localhost:8080/api/movies/popular');
+                const popularResponse = await axios.get('https://popcorn-pal.onrender.com/api/movies/popular');
                 setPopularMovies(popularResponse.data);
 
-                const topRatedResponse = await axios.get('http://localhost:8080/api/movies/top-rated');
+                const topRatedResponse = await axios.get('https://popcorn-pal.onrender.com/api/movies/top-rated');
                 setTopRatedMovies(topRatedResponse.data);
 
-                const upcomingResponse = await axios.get('http://localhost:8080/api/movies/upcoming');
+                const upcomingResponse = await axios.get('https://popcorn-pal.onrender.com/api/movies/upcoming');
                 setUpcomingMovies(upcomingResponse.data);
 
-                const nowPlayingResponse = await axios.get('http://localhost:8080/api/movies/now-playing');
+                const nowPlayingResponse = await axios.get('https://popcorn-pal.onrender.com/api/movies/now-playing');
                 setNowPlayingMovies(nowPlayingResponse.data.slice(0, 5));
                 setError(null);
             } catch (error) {
@@ -68,7 +68,7 @@ const Home = () => {
         const delayDebounceFn = setTimeout(() => {
             const fetchSearchResults = async () => {
                 try {
-                    const response = await axios.get('http://localhost:8080/api/movies/search', {
+                    const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/search', {
                         params: { query: searchTerm }
                     });
                     setSearchResults(response.data.slice(0, 5));
