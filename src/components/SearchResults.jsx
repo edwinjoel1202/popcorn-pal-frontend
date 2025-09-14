@@ -25,7 +25,7 @@ const SearchResults = () => {
         const fetchSearchResults = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/search', {
+                const response = await axios.get('https://pop-corn-pal.onrender.com/api/movies/search', {
                     params: { query }
                 });
                 setSearchResults(response.data);

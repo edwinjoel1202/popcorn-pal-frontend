@@ -30,7 +30,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post('https://popcorn-pal.onrender.com/api/users/register', {
+            const response = await axios.post('https://pop-corn-pal.onrender.com/api/users/register', {
                 name,
                 username,
                 email,

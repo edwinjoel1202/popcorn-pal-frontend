@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: 'https://popcorn-pal.onrender.com/api',
+    baseURL: 'https://pop-corn-pal.onrender.com/api',
 });
 
 instance.interceptors.request.use((config) => {

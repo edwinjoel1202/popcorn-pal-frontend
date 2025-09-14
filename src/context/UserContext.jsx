@@ -12,7 +12,7 @@ export const UserProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('https://popcorn-pal.onrender.com/api/users/me', {
+          const response = await axios.get('https://pop-corn-pal.onrender.com/api/users/me', {
             headers: {
               Authorization: `Bearer ${token}`,
             },

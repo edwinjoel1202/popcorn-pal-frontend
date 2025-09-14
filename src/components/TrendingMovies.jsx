@@ -16,7 +16,7 @@ const TrendingMovies = () => {
     useEffect(() => {
         const fetchTrendingMovies = async () => {
             try {
-                const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/trending');
+                const response = await axios.get('https://pop-corn-pal.onrender.com/api/movies/trending');
                 setTrendingMovies(response.data);
                 setError(null);
             } catch (error) {

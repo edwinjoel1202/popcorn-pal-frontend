@@ -15,7 +15,7 @@ const UpcomingMovies = () => {
     useEffect(() => {
         const fetchUpcomingMovies = async () => {
             try {
-                const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/upcoming');
+                const response = await axios.get('https://pop-corn-pal.onrender.com/api/movies/upcoming');
                 setUpcomingMovies(response.data);
                 setError(null);
             } catch (error) {

@@ -13,7 +13,7 @@ const PopularMovies = () => {
     useEffect(() => {
         const fetchPopularMovies = async () => {
             try {
-                const response = await axios.get('https://popcorn-pal.onrender.com/api/movies/popular');
+                const response = await axios.get('https://pop-corn-pal.onrender.com/api/movies/popular');
                 setPopularMovies(response.data);
                 setError(null);
             } catch (error) {
